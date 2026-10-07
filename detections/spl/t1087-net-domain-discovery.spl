@@ -1,0 +1,10 @@
+``` T1087.002 / T1069.002 - Domain account and group discovery via net.exe / net1.exe
+    Data: Sysmon Event ID 1 (process creation)
+    Matches both net.exe and net1.exe: net.exe spawns net1.exe, and attackers may call net1.exe
+    directly. Because of that chain, every command shows up twice (net + net1).
+    mvfilter/mvindex drop Splunk's NOT_TRANSLATED placeholder from the multivalue User field. ```
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+(Image="*\\net.exe" OR Image="*\\net1.exe") CommandLine="*/domain*"
+| eval User=mvindex(mvfilter(User!="NOT_TRANSLATED"),0)
+| table _time, host, User, CommandLine, ParentImage
+| sort _time desc

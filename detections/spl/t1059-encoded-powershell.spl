@@ -1,0 +1,10 @@
+``` T1059.001 / T1027 - Encoded (Base64) PowerShell command line
+    Data: Sysmon Event ID 1
+    PowerShell accepts shortened forms of -EncodedCommand (-e, -en, -enc ...) and the -ec alias,
+    starting with a dash or a slash. The regex covers all of them and requires whitespace after the switch,
+    so -ExecutionPolicy does not match. ```
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 (Image="*\\powershell.exe" OR Image="*\\pwsh.exe")
+| regex CommandLine="(?i)\s[-/](e|ec|en|enc|enco|encod|encode|encoded|encodedc|encodedco|encodedcom|encodedcomm|encodedcomma|encodedcomman|encodedcommand)\s"
+| eval User=mvindex(mvfilter(User!="NOT_TRANSLATED"),0)
+| table _time host User CommandLine ParentImage
+| sort _time desc

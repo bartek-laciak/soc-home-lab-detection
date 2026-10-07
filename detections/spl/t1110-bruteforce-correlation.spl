@@ -1,0 +1,10 @@
+``` T1110.001 - Password guessing correlated across workstation (4625) and domain controller (4771)
+    The same burst on BOTH sources in the same window is much stronger evidence than either alone.
+    4771 has a single Account_Name; 4625 has two, so mvindex(...,1) takes the target.
+    lower() makes the account names from both sources comparable. ```
+index=endpoint ((EventCode=4625 host=SOC-WIN10*) OR (EventCode=4771 host=SOC-DC01*))
+| eval target=lower(if(EventCode=4625, mvindex(Account_Name,1), Account_Name))
+| search target!="*$"
+| bin _time span=5m
+| stats count(eval(EventCode=4625)) as ws_failures count(eval(EventCode=4771)) as dc_failures values(host) as hosts by _time, target
+| where ws_failures>=5 AND dc_failures>=5

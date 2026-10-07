@@ -1,0 +1,6 @@
+# never commit lab credentials or local notes
+*credentials*
+*secrets*
+*.local
+Thumbs.db
+.DS_Store

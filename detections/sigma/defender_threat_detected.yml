@@ -1,0 +1,22 @@
+title: Microsoft Defender Threat Detected or Remediated
+id: 1fd101b5-f9f4-4a7d-912f-41c3138b881b
+status: experimental
+description: Surfaces Microsoft Defender detection (1116) and remediation (1117) events so that blocked attacks, such as the Mimikatz credential-dumping attempt in this lab, are still triaged. The optional filter excludes the lab's unpacked Atomic Red Team folder.
+references:
+    - https://attack.mitre.org/techniques/T1003/001/
+author: Bartek (SOC home lab)
+date: 2026-10-06
+logsource:
+    product: windows
+    service: windefend
+detection:
+    selection:
+        EventID:
+            - 1116
+            - 1117
+    filter_optional_lab_tooling:
+        Path|contains: '\AtomicRedTeam\tmp\'
+    condition: selection and not 1 of filter_optional_*
+falsepositives:
+    - Security testing tools and test files
+level: high

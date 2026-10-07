@@ -1,0 +1,27 @@
+title: Domain Account and Group Discovery via net.exe
+id: afc16138-6949-43b8-a762-2a86ed57309c
+status: experimental
+description: Detects domain account or group enumeration with net.exe or net1.exe and the /domain switch.
+references:
+    - https://attack.mitre.org/techniques/T1087/002/
+    - https://attack.mitre.org/techniques/T1069/002/
+author: Bartek (SOC home lab)
+date: 2026-10-06
+tags:
+    - attack.discovery
+    - attack.t1087.002
+    - attack.t1069.002
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+    selection_cli:
+        CommandLine|contains: '/domain'
+    condition: all of selection_*
+falsepositives:
+    - Administrators enumerating domain accounts or groups
+level: medium

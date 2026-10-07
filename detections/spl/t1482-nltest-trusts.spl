@@ -1,0 +1,9 @@
+``` T1482 - Domain trust discovery via nltest
+    Data: Sysmon Event ID 1
+    Matches OriginalFileName (taken from the binary's PE metadata) as well as the image path,
+    so the rule still fires if nltest.exe is renamed. ```
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+(OriginalFileName="nltestrk.exe" OR Image="*\\nltest.exe")
+| eval User=mvindex(mvfilter(User!="NOT_TRANSLATED"),0)
+| table _time, host, User, CommandLine, OriginalFileName, ParentImage
+| sort _time desc

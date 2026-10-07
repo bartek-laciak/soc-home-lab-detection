@@ -1,0 +1,12 @@
+``` Microsoft Defender detections for triage (surfaced the blocked Mimikatz / T1003.001 attempt in this lab)
+    Data: Defender Operational log, Event ID 1116 (threat detected) / 1117 (action taken)
+    ThreatName and Severity are not extracted as fields without a Defender add-on, so rex pulls them from the raw event.
+    Defender writes Severity as localized text (Polish and English both appear in this lab), so it is normalized.
+    The unpacked Atomic Red Team folder (\AtomicRedTeam\tmp) is excluded: Defender flags the test files on disk. ```
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Windows Defender/Operational" (EventCode=1116 OR EventCode=1117)
+| rex field=_raw "Name:\s+(?<ThreatName>[^\r\n]+)"
+| rex field=_raw "Severity:\s+(?<Severity>[^\r\n]+)"
+| eval severity_norm=case(Severity IN ("Severe","Poważny","High","Wysoki"),"high", 1=1,lower(Severity))
+| search NOT Path="*AtomicRedTeam\\tmp*"
+| table _time host EventCode ThreatName severity_norm Category Action Path
+| sort _time desc

@@ -1,0 +1,30 @@
+title: Failed Logons Against a User Account
+id: 2b492ae9-6c34-4298-9064-ae040eb28f9f
+status: experimental
+description: Single-event selection for failed interactive, network or RDP logons against a user account. The alert threshold (5 failures per target account in 5 minutes) is applied in the SIEM, see detections/spl/t1110-bruteforce.spl.
+references:
+    - https://attack.mitre.org/techniques/T1110/001/
+author: Bartek (SOC home lab)
+date: 2026-10-06
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+        LogonType:
+            - 2
+            - 3
+            - 10
+    filter_main_machine_account:
+        TargetUserName|endswith: '$'
+    filter_main_empty_name:
+        TargetUserName: '-'
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Users mistyping their password
+    - Services or scheduled tasks with an outdated stored password
+level: medium

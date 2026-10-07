@@ -1,0 +1,13 @@
+``` T1110.001 - Password guessing (workstation view)
+    Data: Security Event ID 4625 (failed logon)
+    mvindex(Account_Name,1) takes the TARGET account. 4625 carries two account names
+    (the subject that attempted the logon and the target), and counting both made innocent
+    accounts look like victims.
+    Logon_Type IN (2,3,10) = interactive, network and RDP.
+    Known limitation: fixed 5-minute bins can split a burst that crosses a bin boundary. ```
+index=endpoint EventCode=4625 Logon_Type IN (2,3,10)
+| eval target=mvindex(Account_Name,1)
+| search target!="*$" target!="-"
+| bin _time span=5m
+| stats count values(Logon_Type) as logon_types by _time, target, host
+| where count>=5

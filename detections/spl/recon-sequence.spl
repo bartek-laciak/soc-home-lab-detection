@@ -1,0 +1,10 @@
+``` Discovery burst - several distinct discovery commands from one user in a short window
+    Covers T1087.002 / T1069.002 / T1482 / T1082 / T1033 as a behaviour, not one by one.
+    Fires only when 3+ DISTINCT commands come from the same user on the same host in a 10-minute bin.
+    Watches net1.exe only (not net.exe) so each net command is counted once. ```
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+  ((Image="*\\net1.exe" CommandLine="*/domain*") OR OriginalFileName="nltestrk.exe" OR Image="*\\whoami.exe" OR Image="*\\systeminfo.exe")
+| eval User=mvindex(mvfilter(User!="NOT_TRANSLATED"),0)
+| bin _time span=10m
+| stats dc(CommandLine) as distinct_cmds values(CommandLine) as commands by _time, host, User
+| where distinct_cmds>=3
